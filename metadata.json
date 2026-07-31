@@ -1,0 +1,6 @@
+{
+  "name": "WORK HUB",
+  "description": "ระบบส่งงานประจำวันสำหรับพนักงาน (Daily Work Hub Submission)",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
