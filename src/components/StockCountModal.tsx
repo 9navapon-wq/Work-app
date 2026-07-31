@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StaffProfile, StockCountSubmission, StockItemCount } from '../types';
 import { ImageUploader } from './ImageUploader';
 import { StaffSelect } from './StaffSelect';
@@ -48,6 +48,14 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
 
   // Editable actual counts state
   const [items, setItems] = useState<StockItemCount[]>(catalog);
+
+  useEffect(() => {
+    if (isOpen) {
+      const currentNow = new Date();
+      setDate(currentNow.toISOString().split('T')[0]);
+      setTime(currentNow.toTimeString().slice(0, 5));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

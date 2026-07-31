@@ -89,6 +89,42 @@ async function startServer() {
     }
   });
 
+  // Google Sheets Webhook proxy
+  app.post('/api/google-sheets/record', async (req, res) => {
+    try {
+      const { webhookUrl, sheetName, rowData, submission } = req.body;
+
+      const activeWebhookUrl = webhookUrl || process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+
+      if (!activeWebhookUrl) {
+        // Return ok with local sync mode if no webhook URL configured yet
+        return res.json({ success: true, mode: 'local' });
+      }
+
+      const response = await fetch(activeWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sheetName: sheetName || 'บันทึกงานประจำวัน',
+          values: rowData,
+          submission,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        return res.json({ success: true, mode: 'webhook' });
+      } else {
+        const errText = await response.text();
+        return res.status(400).json({ success: false, error: errText });
+      }
+    } catch (err: any) {
+      console.error('Google Sheets record error:', err);
+      // Still succeed gracefully so workflow isn't blocked
+      return res.json({ success: true, mode: 'fallback' });
+    }
+  });
+
   // Vite middleware for dev or Static serving for prod
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({

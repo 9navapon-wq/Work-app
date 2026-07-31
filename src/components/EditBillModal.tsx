@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StaffProfile, EditBillSubmission, EditBillCategory } from '../types';
 import { ImageUploader } from './ImageUploader';
 import { StaffSelect } from './StaffSelect';
@@ -45,6 +45,14 @@ export const EditBillModal: React.FC<EditBillModalProps> = ({
   const [employeeName, setEmployeeName] = useState(staff.employeeName);
   const [photoUrl, setPhotoUrl] = useState('');
 
+  useEffect(() => {
+    if (isOpen) {
+      const currentNow = new Date();
+      setDate(currentNow.toISOString().split('T')[0]);
+      setTime(currentNow.toTimeString().slice(0, 5));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,7 +84,7 @@ export const EditBillModal: React.FC<EditBillModalProps> = ({
       employeeName,
       photoUrl: photoUrl || undefined,
       notes: `[${editCategory}] สินค้า: ${productName.trim()} | ราคา: ${numericPrice.toLocaleString('th-TH')} บาท | Phy ID: ${phyId.trim()} | เหตุผล: ${reason.trim()}`,
-      submittedAt: `${defaultDate} ${defaultTime}`,
+      submittedAt: `${date} ${time}`,
     };
 
     onSubmit(newSubmission);

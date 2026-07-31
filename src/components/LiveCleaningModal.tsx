@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StaffProfile, LiveCleaningSubmission } from '../types';
 import { ImageUploader } from './ImageUploader';
 import { StaffSelect } from './StaffSelect';
@@ -59,6 +59,14 @@ export const LiveCleaningModal: React.FC<LiveCleaningModalProps> = ({
     'จัดเรียงสินค้าบนชั้นโชว์ให้เป็นระเบียบ': true,
     'เช็ดทำความสะอาดหน้าจอสมาร์ทโฟนตัวโชว์': true,
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      const currentNow = new Date();
+      setDate(currentNow.toISOString().split('T')[0]);
+      setTime(currentNow.toTimeString().slice(0, 5));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

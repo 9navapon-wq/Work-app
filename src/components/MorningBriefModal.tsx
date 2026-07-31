@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StaffProfile, MorningBriefSubmission } from '../types';
 import { ImageUploader } from './ImageUploader';
 import { StaffSelect } from './StaffSelect';
@@ -38,6 +38,14 @@ export const MorningBriefModal: React.FC<MorningBriefModalProps> = ({
   const [employeeName, setEmployeeName] = useState(staff.employeeName);
   const [photoUrl, setPhotoUrl] = useState('');
   const [briefTopic, setBriefTopic] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const currentNow = new Date();
+      setDate(currentNow.toISOString().split('T')[0]);
+      setTime(currentNow.toTimeString().slice(0, 5));
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

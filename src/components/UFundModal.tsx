@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StaffProfile, UFundSubmission, UFundTransaction } from '../types';
 import { ImageUploader } from './ImageUploader';
 import { StaffSelect } from './StaffSelect';
@@ -51,6 +51,14 @@ export const UFundModal: React.FC<UFundModalProps> = ({
   const [employeeName, setEmployeeName] = useState(staff.employeeName);
   const [photoUrl, setPhotoUrl] = useState('');
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      const currentNow = new Date();
+      setDate(currentNow.toISOString().split('T')[0]);
+      setTime(currentNow.toTimeString().slice(0, 5));
+    }
+  }, [isOpen]);
 
   // Quick transaction simulator
   const [showAddTx, setShowAddTx] = useState(false);
