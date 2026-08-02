@@ -255,7 +255,17 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                     </div>
 
                     {/* Right action & Image Thumbnail */}
-                    <div className="flex items-center gap-3 self-end sm:self-center">
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      {item.taskType === 'dhl' && (
+                        <button
+                          onClick={() => setSelectedDhlPdf(item)}
+                          className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-2xs transition-transform hover:scale-105 cursor-pointer"
+                          title="ดูและพิมพ์ไฟล์ PDF"
+                        >
+                          <Printer className="w-3.5 h-3.5" /> พิมพ์ PDF
+                        </button>
+                      )}
+
                       {item.photoUrl && (
                         <button
                           onClick={() => setSelectedPhoto(item.photoUrl || null)}
@@ -307,6 +317,163 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* DHL PDF Document Preview Modal */}
+      {selectedDhlPdf && (
+        <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn print:p-0 print:bg-white print:static">
+          <div className="bg-white text-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-6 print:shadow-none print:rounded-none print:w-full print:max-w-none">
+            {/* Header toolbar (Hidden when printing) */}
+            <div className="bg-amber-500 text-slate-950 p-4 flex items-center justify-between font-bold print:hidden">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5" />
+                <span>ใบรายงานส่งงาน DHL (บันทึกเป็นไฟล์ PDF / พิมพ์)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-4 py-2 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" /> บันทึก PDF / พิมพ์
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDhlPdf(null)}
+                  className="px-3 py-2 bg-white/20 hover:bg-white/30 text-slate-950 text-xs font-bold rounded-xl flex items-center gap-1"
+                >
+                  <X className="w-4 h-4" /> ปิด
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Document Content */}
+            <div className="p-8 space-y-6 print:p-6 print:space-y-4 max-h-[80vh] overflow-y-auto print:max-h-none print:overflow-visible">
+              <div className="border-b-2 border-amber-500 pb-4 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black">
+                      DHL
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-black text-slate-900 tracking-tight">
+                        ใบรายงานส่งมอบ / ตรวจรับสินค้า DHL
+                      </h1>
+                      <p className="text-xs text-slate-500">
+                        OFFICIAL DHL DAILY TRANSACTION & INSPECTION REPORT
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right text-xs">
+                  <p className="font-bold text-slate-800">วันที่: {selectedDhlPdf.date}</p>
+                  <p className="font-medium text-slate-500">เวลา: {selectedDhlPdf.time} น.</p>
+                </div>
+              </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+                <div>
+                  <span className="text-slate-400 block font-medium">หัวข้อ / เลขที่งาน DHL:</span>
+                  <span className="font-bold text-slate-900">
+                    {selectedDhlPdf.dhlTopic || 'รับ/ส่งมอบสินค้า DHL'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">พนักงานผู้ส่งงาน:</span>
+                  <span className="font-bold text-slate-900">
+                    {selectedDhlPdf.staffEmployeeName || selectedDhlPdf.employeeName} ({selectedDhlPdf.staffEmployeeId || selectedDhlPdf.employeeId})
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">จำนวนภาพถ่ายที่นับได้:</span>
+                  <span className="font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
+                    {selectedDhlPdf.imageCount || (selectedDhlPdf.images?.length || 0)} / 50 ภาพ
+                  </span>
+                </div>
+              </div>
+
+              {selectedDhlPdf.notes && (
+                <div className="text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
+                  <span className="font-bold text-slate-700 block mb-1">📝 หมายเหตุเพิ่มเติม:</span>
+                  <p className="text-slate-600">{selectedDhlPdf.notes}</p>
+                </div>
+              )}
+
+              {/* Signer Signature Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                <div className="border border-slate-300 rounded-2xl p-4 bg-white text-center">
+                  <span className="text-xs font-bold text-slate-500 block mb-2">
+                    ✍️ ลายมือชื่อผู้เซ็นรับ / ส่งงาน
+                  </span>
+                  <div className="h-28 flex items-center justify-center border-b border-dashed border-slate-200 mb-2">
+                    {selectedDhlPdf.signatureDataUrl ? (
+                      <img
+                        src={selectedDhlPdf.signatureDataUrl}
+                        alt="Signature"
+                        className="max-h-24 max-w-full object-contain mx-auto"
+                      />
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">ไม่มีลายเซ็น</span>
+                    )}
+                  </div>
+                  <p className="text-sm font-black text-slate-900">
+                    ({selectedDhlPdf.signerName || 'ไม่ระบุชื่อผู้เซ็น'})
+                  </p>
+                  <span className="text-[11px] text-slate-500">ผู้รับ/ผู้ส่งมอบงาน DHL</span>
+                </div>
+
+                <div className="border border-slate-300 rounded-2xl p-4 bg-white text-center flex flex-col justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-500 block mb-2">
+                      👥 เจ้าหน้าที่ผู้บันทึกรายงานหน้าร้าน
+                    </span>
+                    <div className="h-28 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-slate-700 mb-1">
+                          {selectedDhlPdf.staffEmployeeName || selectedDhlPdf.employeeName}
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          รหัส: {selectedDhlPdf.staffEmployeeId || selectedDhlPdf.employeeId}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-400 border-t pt-2">
+                    บันทึกเข้าระบบ WORK HUB เมื่อ {selectedDhlPdf.submittedAt}
+                  </p>
+                </div>
+              </div>
+
+              {/* Photo Grid (Max 50 images) */}
+              {selectedDhlPdf.images && selectedDhlPdf.images.length > 0 && (
+                <div className="pt-4">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-3">
+                    <ImageIcon className="w-4 h-4 text-amber-600" />
+                    ภาพถ่ายแนบประกอบการส่งมอบ/ตรวจรับ ({selectedDhlPdf.images.length} ภาพ)
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    {selectedDhlPdf.images.map((img: string, idx: number) => (
+                      <div
+                        key={idx}
+                        className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50 aspect-square"
+                      >
+                        <img
+                          src={img}
+                          alt={`DHL ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <span className="absolute bottom-1 left-1 bg-slate-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Full Photo Viewer Lightbox */}
       {selectedPhoto && (
