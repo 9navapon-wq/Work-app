@@ -6,17 +6,7 @@ import { StaffMember } from '../data/staffData';
 import {
   PackageCheck,
   X,
-  Calendar,
-  Clock,
-  User,
   Send,
-  Boxes,
-  Plus,
-  Minus,
-  Search,
-  AlertTriangle,
-  CheckCircle2,
-  FileText,
 } from 'lucide-react';
 
 interface StockCountModalProps {
@@ -31,7 +21,7 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
   isOpen,
   onClose,
   staff,
-  catalog,
+  catalog: _catalog,
   onSubmit,
 }) => {
   const now = new Date();
@@ -44,10 +34,6 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
   const [employeeName, setEmployeeName] = useState(staff.employeeName);
   const [photoUrl, setPhotoUrl] = useState('');
   const [notes, setNotes] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Editable actual counts state
-  const [items, setItems] = useState<StockItemCount[]>(catalog);
 
   useEffect(() => {
     if (isOpen) {
@@ -58,37 +44,6 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const handleQuantityChange = (itemId: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.itemId === itemId) {
-          const updated = Math.max(0, item.actualCount + delta);
-          return { ...item, actualCount: updated };
-        }
-        return item;
-      })
-    );
-  };
-
-  const handleDirectQuantityChange = (itemId: string, value: string) => {
-    const num = parseInt(value, 10);
-    const validNum = isNaN(num) ? 0 : Math.max(0, num);
-    setItems((prev) =>
-      prev.map((item) => (item.itemId === itemId ? { ...item, actualCount: validNum } : item))
-    );
-  };
-
-  const filteredItems = items.filter(
-    (item) =>
-      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.itemId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalUnitsCounted = items.reduce((sum, item) => sum + item.actualCount, 0);
-  const totalSystemUnits = items.reduce((sum, item) => sum + item.systemCount, 0);
-  const totalDifference = totalUnitsCounted - totalSystemUnits;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,8 +61,8 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
       employeeName,
       photoUrl,
       notes: notes.trim(),
-      items,
-      totalUnitsCounted,
+      items: [],
+      totalUnitsCounted: 0,
       submittedAt: new Date().toLocaleString('th-TH'),
     };
 
@@ -141,140 +96,7 @@ export const StockCountModal: React.FC<StockCountModalProps> = ({
         </div>
 
         <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-          {/* Summary Metric Box */}
-          <div className="bg-purple-950/90 border border-purple-800/60 rounded-2xl p-4 text-white flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <span className="text-xs text-purple-200 block">ยอดนับรวมจริง (Actual Total)</span>
-              <span className="text-2xl font-extrabold font-mono text-purple-100">
-                {totalUnitsCounted} <span className="text-xs font-normal text-purple-300">ชิ้น/เครื่อง</span>
-              </span>
-            </div>
-
-            <div>
-              <span className="text-xs text-purple-200 block">ยอดระบบ (System Expected)</span>
-              <span className="text-lg font-bold font-mono text-slate-300">
-                {totalSystemUnits} <span className="text-xs font-normal text-purple-300">ชิ้น</span>
-              </span>
-            </div>
-
-            <div>
-              <span className="text-xs text-purple-200 block">ผลต่าง (Difference)</span>
-              <span
-                className={`text-lg font-bold font-mono flex items-center gap-1 ${
-                  totalDifference === 0
-                    ? 'text-emerald-400'
-                    : totalDifference > 0
-                    ? 'text-amber-400'
-                    : 'text-rose-400'
-                }`}
-              >
-                {totalDifference === 0 ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> ตรงเป๊ะ (0)
-                  </>
-                ) : (
-                  <>
-                    <AlertTriangle className="w-4 h-4" /> {totalDifference > 0 ? `+${totalDifference}` : totalDifference}
-                  </>
-                )}
-              </span>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Stock Count Table */}
-            <div className="space-y-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <label className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                  <Boxes className="w-4 h-4 text-purple-600" /> ตรวจนับรายการสินค้า
-                </label>
-                {/* Search Box */}
-                <div className="relative w-full sm:w-56">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="ค้นหาชื่อสินค้า / SKU..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-              </div>
-
-              {/* Items List */}
-              <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-100 dark:divide-slate-800/80 bg-white dark:bg-slate-900 max-h-64 overflow-y-auto">
-                {filteredItems.length === 0 ? (
-                  <p className="p-4 text-center text-xs text-slate-400">ไม่พบรายการสินค้าที่ค้นหา</p>
-                ) : (
-                  filteredItems.map((item) => {
-                    const diff = item.actualCount - item.systemCount;
-                    return (
-                      <div
-                        key={item.itemId}
-                        className="p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-[10px] font-bold font-mono px-1.5 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 rounded border border-purple-200 dark:border-purple-800">
-                              {item.itemId}
-                            </span>
-                            <span className="text-[10px] text-slate-400">({item.category})</span>
-                          </div>
-                          <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
-                            {item.itemName}
-                          </p>
-                          <span className="text-[11px] text-slate-500">
-                            ยอดระบบ: <strong className="font-mono">{item.systemCount}</strong> {item.unit}
-                          </span>
-                        </div>
-
-                        {/* Controls */}
-                        <div className="flex items-center justify-between sm:justify-end gap-3">
-                          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <button
-                              type="button"
-                              onClick={() => handleQuantityChange(item.itemId, -1)}
-                              className="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition-colors shadow-2xs"
-                            >
-                              <Minus className="w-3.5 h-3.5" />
-                            </button>
-                            <input
-                              type="number"
-                              value={item.actualCount}
-                              onChange={(e) => handleDirectQuantityChange(item.itemId, e.target.value)}
-                              className="w-12 text-center text-xs font-bold font-mono bg-transparent outline-none text-slate-900 dark:text-slate-100"
-                              min={0}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleQuantityChange(item.itemId, 1)}
-                              className="w-7 h-7 rounded-lg bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center font-bold text-sm transition-colors shadow-2xs"
-                            >
-                              <Plus className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="w-16 text-right">
-                            <span
-                              className={`text-xs font-mono font-bold ${
-                                diff === 0
-                                  ? 'text-emerald-600 dark:text-emerald-400'
-                                  : diff > 0
-                                  ? 'text-amber-600 dark:text-amber-400'
-                                  : 'text-rose-600 dark:text-rose-400'
-                              }`}
-                            >
-                              {diff === 0 ? 'ตรง' : diff > 0 ? `+${diff}` : diff}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
             {/* Date & Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
