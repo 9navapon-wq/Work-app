@@ -86,6 +86,18 @@ ${itemsList}
 `;
       break;
     }
+    case 'dhl': {
+      const sub = submission as any;
+      header = '🚚 <b>[รายงานส่งงาน] DHL ส่งงาน / ตรวจรับสินค้า</b>';
+      details = `
+• <b>หัวข้อ/รายการ DHL:</b> ${sub.dhlTopic || 'รับ/ส่งมอบสินค้า DHL'}
+• <b>พนักงานผู้ส่งงาน:</b> ${sub.staffEmployeeName || sub.employeeName} (${sub.staffEmployeeId || sub.employeeId})
+• <b>ผู้เซ็นรับ/ส่งงาน:</b> <b>${sub.signerName || 'ไม่ระบุ'}</b>
+• <b>จำนวนภาพถ่ายที่นับได้:</b> <b>${sub.imageCount || 0} ภาพ</b> (สูงสุด 50 ภาพ)
+• <b>หมายเหตุ:</b> ${sub.notes || '-'}
+`;
+      break;
+    }
     default:
       header = '📌 <b>[รายงานส่งงาน] รายงานใหม่</b>';
       details = '• ส่งรายงานสำเร็จ';

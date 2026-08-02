@@ -14,6 +14,9 @@ import {
   Download,
   Filter,
   CheckCircle2,
+  Printer,
+  Truck,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface SubmissionHistoryModalProps {
@@ -34,6 +37,7 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedDhlPdf, setSelectedDhlPdf] = useState<any | null>(null);
 
   if (!isOpen) return null;
 
@@ -194,6 +198,12 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                             </span>
                           )}
 
+                          {item.taskType === 'dhl' && (
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200">
+                              🚚 DHL ({ (item as any).imageCount || 0 } ภาพ)
+                            </span>
+                          )}
+
                           <span className="text-[11px] font-medium text-slate-400">
                             บันทึกเมื่อ {item.submittedAt}
                           </span>
@@ -211,7 +221,20 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                           </span>
                         </div>
 
-                        {item.taskType === 'edit_bill' ? (
+                        {item.taskType === 'dhl' ? (
+                          <div className="bg-amber-50/80 dark:bg-amber-950/30 p-3 rounded-2xl border border-amber-200 dark:border-amber-900/50 mt-2 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                              <span><strong>🚚 หัวข้อ:</strong> {(item as any).dhlTopic || 'รับ/ส่งมอบสินค้า DHL'}</span>
+                              <span><strong>✍️ ผู้เซ็น:</strong> <span className="font-bold text-amber-700 dark:text-amber-400">{(item as any).signerName || '-'}</span></span>
+                              <span><strong>📸 จำนวนภาพ:</strong> {(item as any).imageCount || 0} ภาพ (สูงสุด 50 ภาพ)</span>
+                            </div>
+                            {(item as any).notes && (
+                              <div>
+                                <span><strong>📝 หมายเหตุ:</strong> {(item as any).notes}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : item.taskType === 'edit_bill' ? (
                           <div className="bg-rose-50/80 dark:bg-rose-950/30 p-3 rounded-2xl border border-rose-100 dark:border-rose-900/50 mt-2 text-xs space-y-1.5 text-slate-700 dark:text-slate-200">
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                               <span><strong>🕒 วันเวลา:</strong> {(item as any).dateTime || `${item.date} ${item.time}`}</span>

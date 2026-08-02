@@ -1,6 +1,6 @@
 import React from 'react';
 import { TaskSubmission, TaskTypeId } from '../types';
-import { Bell, CheckCircle2, Clock, CreditCard, Megaphone, Sparkles, PackageCheck, Receipt, ArrowRight } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, CreditCard, Megaphone, Sparkles, PackageCheck, Receipt, ArrowRight, Truck } from 'lucide-react';
 
 interface TaskSummaryBarProps {
   submissions: TaskSubmission[];
@@ -60,6 +60,15 @@ export const TASK_CONFIG: Record<TaskTypeId, {
     badgeBg: 'bg-rose-50 dark:bg-rose-950/60',
     badgeText: 'text-rose-700 dark:text-rose-300',
     accentGradient: 'from-rose-600 to-pink-600',
+  },
+  dhl: {
+    id: 'dhl',
+    title: 'DHL ส่งงาน / ตรวจรับสินค้า',
+    subtitle: 'ถ่ายรูป (สูงสุด 50 ภาพ) พร้อมเซ็นชื่อ',
+    icon: Truck,
+    badgeBg: 'bg-amber-50 dark:bg-amber-950/60',
+    badgeText: 'text-amber-700 dark:text-amber-300',
+    accentGradient: 'from-amber-500 to-yellow-600',
   },
 };
 

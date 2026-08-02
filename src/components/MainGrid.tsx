@@ -14,6 +14,10 @@ import {
   Boxes,
   Receipt,
   Tag,
+  Truck,
+  Camera,
+  PenTool,
+  Printer,
 } from 'lucide-react';
 
 interface MainGridProps {
@@ -295,10 +299,10 @@ export const MainGrid: React.FC<MainGridProps> = ({
           </div>
         </div>
 
-        {/* Card 5: แก้ไขบิล (EDIT BILL) - Rich Rose/Red - Full Width on md */}
+        {/* Card 5: แก้ไขบิล (EDIT BILL) - Rich Rose/Red */}
         <div
           onClick={() => onOpenTask('edit_bill')}
-          className="group relative md:col-span-2 bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 hover:from-rose-650 hover:to-red-650 text-white rounded-[2.5rem] p-7 shadow-2xl shadow-rose-200/80 dark:shadow-rose-950/40 transition-all duration-300 cursor-pointer overflow-hidden border-4 border-white dark:border-slate-800 hover:scale-[1.01]"
+          className="group relative bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 hover:from-rose-650 hover:to-red-650 text-white rounded-[2.5rem] p-7 shadow-2xl shadow-rose-200/80 dark:shadow-rose-950/40 transition-all duration-300 cursor-pointer overflow-hidden border-4 border-white dark:border-slate-800 hover:scale-[1.01]"
         >
           <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/20 transition-all" />
 
@@ -356,6 +360,73 @@ export const MainGrid: React.FC<MainGridProps> = ({
             <div className="pt-3 border-t border-white/20 flex items-center justify-between text-xs font-black text-white">
               <span>เลือกประเภท & กรอกขอแก้ไขบิล</span>
               <div className="w-9 h-9 rounded-2xl bg-white text-rose-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-all">
+                <ArrowRight className="w-5 h-5" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 6: DHL ส่งงาน / ตรวจรับสินค้า - Amber/Yellow Gradient */}
+        <div
+          onClick={() => onOpenTask('dhl')}
+          className="group relative bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-600 hover:from-amber-600 hover:to-yellow-700 text-slate-950 rounded-[2.5rem] p-7 shadow-2xl shadow-amber-200/80 dark:shadow-amber-950/40 transition-all duration-300 cursor-pointer overflow-hidden border-4 border-white dark:border-slate-800 hover:scale-[1.01]"
+        >
+          <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/20 rounded-full blur-2xl pointer-events-none group-hover:bg-white/30 transition-all" />
+
+          <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
+            <div>
+              <div className="flex items-start justify-between mb-5">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Truck className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-950 bg-white/40 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                      การ์ดเมนูที่ 6
+                    </span>
+                    <h3 className="text-2xl font-black text-slate-950 leading-none">
+                      DHL ส่งงาน / ตรวจรับ
+                    </h3>
+                  </div>
+                </div>
+
+                {isSubmittedToday('dhl') ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black bg-emerald-500 text-white shadow-sm">
+                    <CheckCircle2 className="w-4 h-4 text-white" /> ส่งงานแล้ว
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-950/20 text-slate-950 backdrop-blur-md">
+                    <Clock className="w-4 h-4 text-slate-900" /> รอการส่ง
+                  </span>
+                )}
+              </div>
+
+              {/* DHL Features Preview Box */}
+              <div className="bg-slate-950/10 border border-slate-950/20 rounded-2xl p-4 backdrop-blur-md mb-4">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5 mb-2.5">
+                  <Camera className="w-4 h-4 text-slate-950" /> จุดเด่นระบบรายงาน DHL:
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-3 py-1 rounded-xl bg-slate-950/10 text-slate-950 text-xs font-black border border-slate-950/20">
+                    📸 ถ่ายได้สูงสุด 50 ภาพ
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-slate-950/10 text-slate-950 text-xs font-black border border-slate-950/20">
+                    ✍️ เซ็นลายมือชื่อคนเซ็น
+                  </span>
+                  <span className="px-3 py-1 rounded-xl bg-slate-950/10 text-slate-950 text-xs font-black border border-slate-950/20">
+                    📄 นำออกเป็นไฟล์ PDF
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs font-semibold text-slate-900 leading-relaxed">
+                ถ่ายรูปสภาพสินค้า/พัสดุ นับจำนวนตามภาพที่ถ่าย เลือกพนักงาน พร้อมระบบเซ็นชื่อด้วยลายมือและนำออกเป็น PDF
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-slate-950/20 flex items-center justify-between text-xs font-black text-slate-950">
+              <span>ถ่ายรูป 50 ภาพ & เซ็นรับส่งงาน</span>
+              <div className="w-9 h-9 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center shadow-md group-hover:scale-110 transition-all">
                 <ArrowRight className="w-5 h-5" />
               </div>
             </div>

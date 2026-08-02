@@ -34,6 +34,7 @@ import { MorningBriefModal } from './components/MorningBriefModal';
 import { LiveCleaningModal } from './components/LiveCleaningModal';
 import { StockCountModal } from './components/StockCountModal';
 import { EditBillModal } from './components/EditBillModal';
+import { DhlModal } from './components/DhlModal';
 import { SubmissionHistoryModal } from './components/SubmissionHistoryModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { GoogleSheetsConfigModal } from './components/GoogleSheetsConfigModal';
@@ -165,6 +166,7 @@ export default function App() {
       live_cleaning: 'Live Display & Big Cleaning',
       stock_count: 'นับสต๊อก It Easy',
       edit_bill: 'แก้ไขบิล (EDIT BILL)',
+      dhl: 'DHL ส่งงาน / ตรวจรับสินค้า',
     };
 
     triggerToast(`ส่งงาน "${taskNameMap[submission.taskType]}" เรียบร้อยแล้ว!`);
@@ -349,6 +351,13 @@ export default function App() {
 
       <EditBillModal
         isOpen={activeModal === 'edit_bill'}
+        onClose={() => setActiveModal(null)}
+        staff={staff}
+        onSubmit={(sub) => handleAddSubmission(sub)}
+      />
+
+      <DhlModal
+        isOpen={activeModal === 'dhl'}
         onClose={() => setActiveModal(null)}
         staff={staff}
         onSubmit={(sub) => handleAddSubmission(sub)}

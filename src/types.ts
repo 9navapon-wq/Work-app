@@ -1,4 +1,4 @@
-export type TaskTypeId = 'ufund' | 'morning_brief' | 'live_cleaning' | 'stock_count' | 'edit_bill';
+export type TaskTypeId = 'ufund' | 'morning_brief' | 'live_cleaning' | 'stock_count' | 'edit_bill' | 'dhl';
 
 export type EditBillCategory = 
   | '🔴 edit bill หลัง 20:00' 
@@ -80,10 +80,22 @@ export interface EditBillSubmission extends BaseSubmission {
   reason: string;
 }
 
+export interface DhlSubmission extends BaseSubmission {
+  taskType: 'dhl';
+  images: string[];
+  imageCount: number;
+  signatureDataUrl?: string;
+  signerName: string;
+  staffEmployeeId: string;
+  staffEmployeeName: string;
+  dhlTopic?: string;
+}
+
 export type TaskSubmission = 
   | UFundSubmission 
   | MorningBriefSubmission 
   | LiveCleaningSubmission 
   | StockCountSubmission
-  | EditBillSubmission;
+  | EditBillSubmission
+  | DhlSubmission;
 

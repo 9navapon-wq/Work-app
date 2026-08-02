@@ -113,6 +113,24 @@ export const formatSubmissionToSheetRow = (submission: TaskSubmission): string[]
         : '-';
       break;
     }
+    case 'edit_bill': {
+      const sub = submission as any;
+      taskTypeName = '📝 แก้ไขบิล (EDIT BILL)';
+      categoryOrTopic = sub.editCategory || '-';
+      amountOrQty = `${Number(sub.price || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท`;
+      refId = sub.phyId || '-';
+      reasonOrDetail = `${sub.productName || '-'} (${sub.reason || '-'})`;
+      break;
+    }
+    case 'dhl': {
+      const sub = submission as any;
+      taskTypeName = '🚚 DHL ส่งงาน / ตรวจรับสินค้า';
+      categoryOrTopic = sub.dhlTopic || 'รับ/ส่งมอบสินค้า DHL';
+      amountOrQty = `${sub.imageCount || 0} ภาพ`;
+      refId = sub.signerName || '-';
+      reasonOrDetail = `ผู้เซ็น: ${sub.signerName || '-'} (ภาพถ่าย ${sub.imageCount || 0} ภาพ)`;
+      break;
+    }
     default:
       taskTypeName = '📌 รายงานอื่นๆ';
   }
