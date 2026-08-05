@@ -92,8 +92,46 @@ export const DhlModal: React.FC<DhlModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Compress image before adding to state to prevent browser memory & localStorage crash
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 800;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.65));
+          } else {
+            resolve(e.target?.result as string);
+          }
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Handle Multi-Photo Upload (max 50 photos)
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -105,18 +143,18 @@ export const DhlModal: React.FC<DhlModalProps> = ({
 
     const filesToLoad = Array.from(files).slice(0, remainingSlots);
 
-    filesToLoad.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setImages((prev) => {
-            if (prev.length >= 50) return prev;
-            return [...prev, event.target!.result as string];
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      const compressedResults = await Promise.all(
+        filesToLoad.map((file) => compressImage(file))
+      );
+      const validResults = compressedResults.filter((res) => res && res.length > 0);
+      setImages((prev) => {
+        const next = [...prev, ...validResults];
+        return next.slice(0, 50);
+      });
+    } catch (err) {
+      console.error('Error compressing uploaded photos:', err);
+    }
 
     // Reset input so same file can be re-selected if needed
     e.target.value = '';
@@ -132,16 +170,18 @@ export const DhlModal: React.FC<DhlModalProps> = ({
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
 
-    if ('touches' in e) {
-      const touch = e.touches[0];
+    if ('touches' in e && e.touches) {
+      const touch = e.touches[0] || (e as React.TouchEvent).changedTouches?.[0];
+      if (!touch) return { x: 0, y: 0 };
       return {
         x: touch.clientX - rect.left,
         y: touch.clientY - rect.top,
       };
     } else {
+      const mouseEvent = e as React.MouseEvent<HTMLCanvasElement>;
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: mouseEvent.clientX - rect.left,
+        y: mouseEvent.clientY - rect.top,
       };
     }
   };

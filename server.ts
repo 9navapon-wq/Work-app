@@ -39,26 +39,59 @@ async function startServer() {
       }
 
       // If photo is present (base64 or HTTP URL)
-      if (photoUrl && typeof photoUrl === 'string' && photoUrl.startsWith('http')) {
-        const photoEndpoint = `https://api.telegram.org/bot${activeToken}/sendPhoto`;
-        const photoResponse = await fetch(photoEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: activeChatId,
-            photo: photoUrl,
-            caption: message,
-            parse_mode: 'HTML',
-          }),
-        });
+      if (photoUrl && typeof photoUrl === 'string' && photoUrl.trim().length > 0) {
+        if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
+          const photoEndpoint = `https://api.telegram.org/bot${activeToken}/sendPhoto`;
+          const photoResponse = await fetch(photoEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: activeChatId,
+              photo: photoUrl,
+              caption: message,
+              parse_mode: 'HTML',
+            }),
+          });
 
-        const photoData = await photoResponse.json();
-        if (photoData.ok) {
-          return res.json({ success: true, result: photoData.result });
+          const photoData = await photoResponse.json();
+          if (photoData.ok) {
+            return res.json({ success: true, result: photoData.result });
+          }
+        } else if (photoUrl.startsWith('data:image/')) {
+          try {
+            const matches = photoUrl.match(/^data:(image\/\w+);base64,(.+)$/);
+            if (matches) {
+              const mimeType = matches[1];
+              const base64Data = matches[2];
+              const buffer = Buffer.from(base64Data, 'base64');
+              const blob = new Blob([buffer], { type: mimeType });
+
+              const formData = new FormData();
+              formData.append('chat_id', activeChatId);
+              formData.append('photo', blob, 'photo.jpg');
+              formData.append('caption', message);
+              formData.append('parse_mode', 'HTML');
+
+              const photoEndpoint = `https://api.telegram.org/bot${activeToken}/sendPhoto`;
+              const photoResponse = await fetch(photoEndpoint, {
+                method: 'POST',
+                body: formData,
+              });
+
+              const photoData = await photoResponse.json();
+              if (photoData.ok) {
+                return res.json({ success: true, result: photoData.result });
+              } else {
+                console.warn('Telegram sendPhoto base64 error:', photoData.description);
+              }
+            }
+          } catch (photoErr) {
+            console.error('Failed to parse or send base64 photo to Telegram:', photoErr);
+          }
         }
       }
 
-      // Default text message
+      // Default text message fallback
       const textEndpoint = `https://api.telegram.org/bot${activeToken}/sendMessage`;
       const response = await fetch(textEndpoint, {
         method: 'POST',

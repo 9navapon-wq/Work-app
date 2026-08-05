@@ -102,15 +102,44 @@ export default function App() {
 
   // Save authentication & staff to localStorage
   useEffect(() => {
-    localStorage.setItem('workhub_is_authenticated', isAuthenticated ? 'true' : 'false');
+    try {
+      localStorage.setItem('workhub_is_authenticated', isAuthenticated ? 'true' : 'false');
+    } catch (e) {
+      console.error('Failed saving auth to localStorage:', e);
+    }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    localStorage.setItem('workhub_staff', JSON.stringify(staff));
+    try {
+      localStorage.setItem('workhub_staff', JSON.stringify(staff));
+    } catch (e) {
+      console.error('Failed saving staff to localStorage:', e);
+    }
   }, [staff]);
 
   useEffect(() => {
-    localStorage.setItem('workhub_submissions', JSON.stringify(submissions));
+    try {
+      localStorage.setItem('workhub_submissions', JSON.stringify(submissions));
+    } catch (e) {
+      console.warn('QuotaExceededError when saving submissions to localStorage. Saving optimized version:', e);
+      try {
+        // Strip heavy image payloads from older submissions for localStorage persistence backup
+        const optimized = submissions.map((sub, idx) => {
+          if (idx > 2) {
+            return {
+              ...sub,
+              images: sub.images ? sub.images.slice(0, 1) : [],
+              photoUrl: sub.photoUrl ? sub.photoUrl.slice(0, 200) : undefined,
+              signatureDataUrl: sub.signatureDataUrl ? sub.signatureDataUrl.slice(0, 200) : undefined,
+            };
+          }
+          return sub;
+        });
+        localStorage.setItem('workhub_submissions', JSON.stringify(optimized));
+      } catch (err2) {
+        console.error('Could not save submissions to localStorage:', err2);
+      }
+    }
   }, [submissions]);
 
   useEffect(() => {

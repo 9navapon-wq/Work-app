@@ -115,10 +115,25 @@ ${details.trim()}
   `.trim();
 };
 
+export const extractSubmissionPhoto = (submission: any): string | undefined => {
+  if (submission.photoUrl && typeof submission.photoUrl === 'string') return submission.photoUrl;
+  if (submission.imageUrl && typeof submission.imageUrl === 'string') return submission.imageUrl;
+  if (submission.slipImageUrl && typeof submission.slipImageUrl === 'string') return submission.slipImageUrl;
+  if (submission.billPhotoUrl && typeof submission.billPhotoUrl === 'string') return submission.billPhotoUrl;
+  if (Array.isArray(submission.images) && submission.images.length > 0 && typeof submission.images[0] === 'string') {
+    return submission.images[0];
+  }
+  if (Array.isArray(submission.photos) && submission.photos.length > 0 && typeof submission.photos[0] === 'string') {
+    return submission.photos[0];
+  }
+  if (submission.signatureDataUrl && typeof submission.signatureDataUrl === 'string') return submission.signatureDataUrl;
+  return undefined;
+};
+
 export const sendTelegramNotification = async (submission: TaskSubmission): Promise<{ success: boolean; error?: string }> => {
   const config = getStoredTelegramConfig();
   const message = formatTelegramMessage(submission);
-  const photoUrl = (submission as any).imageUrl || (submission as any).slipImageUrl || undefined;
+  const photoUrl = extractSubmissionPhoto(submission as any);
 
   try {
     const res = await fetch('/api/telegram-notify', {
