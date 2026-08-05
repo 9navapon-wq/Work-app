@@ -28,34 +28,40 @@ async function startServer() {
     try {
       const { botToken, chatId, message, photoUrl } = req.body;
 
-      const activeToken = botToken || process.env.TELEGRAM_BOT_TOKEN;
-      const activeChatId = chatId || process.env.TELEGRAM_CHAT_ID;
+      const activeToken = (botToken && typeof botToken === 'string' && botToken.trim()) || process.env.TELEGRAM_BOT_TOKEN;
+      const activeChatId = (chatId && typeof chatId === 'string' && chatId.trim()) || process.env.TELEGRAM_CHAT_ID;
 
       if (!activeToken || !activeChatId) {
         return res.status(400).json({
           success: false,
-          error: 'กรุณากรอก Telegram Bot Token และ Chat ID ก่อนใช้งาน (สามารถตั้งค่าใน UI หรือใน .env ได้)',
+          error: 'ยังไม่ได้กรอก Telegram Bot Token หรือ Chat ID (โปรดเปิดเมนู "ตั้งค่า Telegram" ด้านบนเพื่อบันทึกรหัส)',
         });
       }
 
-      // If photo is present (base64 or HTTP URL)
+      // If photo is present (base64 or HTTP URL), try sending photo with caption
       if (photoUrl && typeof photoUrl === 'string' && photoUrl.trim().length > 0) {
         if (photoUrl.startsWith('http://') || photoUrl.startsWith('https://')) {
-          const photoEndpoint = `https://api.telegram.org/bot${activeToken}/sendPhoto`;
-          const photoResponse = await fetch(photoEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: activeChatId,
-              photo: photoUrl,
-              caption: message,
-              parse_mode: 'HTML',
-            }),
-          });
+          try {
+            const photoEndpoint = `https://api.telegram.org/bot${activeToken}/sendPhoto`;
+            const photoResponse = await fetch(photoEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: activeChatId,
+                photo: photoUrl,
+                caption: message,
+                parse_mode: 'HTML',
+              }),
+            });
 
-          const photoData = await photoResponse.json();
-          if (photoData.ok) {
-            return res.json({ success: true, result: photoData.result });
+            const photoData = await photoResponse.json();
+            if (photoData.ok) {
+              return res.json({ success: true, result: photoData.result });
+            } else {
+              console.warn('Telegram sendPhoto URL warning:', photoData.description);
+            }
+          } catch (pErr) {
+            console.error('Telegram sendPhoto URL fetch error:', pErr);
           }
         } else if (photoUrl.startsWith('data:image/')) {
           try {
@@ -91,7 +97,7 @@ async function startServer() {
         }
       }
 
-      // Default text message fallback
+      // Default text message fallback (HTML mode)
       const textEndpoint = `https://api.telegram.org/bot${activeToken}/sendMessage`;
       const response = await fetch(textEndpoint, {
         method: 'POST',
@@ -105,14 +111,32 @@ async function startServer() {
       });
 
       const data = await response.json();
-      if (!data.ok) {
-        return res.status(400).json({
-          success: false,
-          error: data.description || 'เกิดข้อผิดพลาดในการส่งข้อความผ่าน Telegram Bot API',
-        });
+      if (data.ok) {
+        return res.json({ success: true, result: data.result });
       }
 
-      return res.json({ success: true, result: data.result });
+      // Fallback to plain text if HTML parsing failed
+      console.warn('Telegram HTML sendMessage failed, trying plain text fallback:', data.description);
+      const cleanMessage = message.replace(/<[^>]*>/g, '');
+      const plainResponse = await fetch(textEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: activeChatId,
+          text: cleanMessage,
+          disable_web_page_preview: true,
+        }),
+      });
+
+      const plainData = await plainResponse.json();
+      if (plainData.ok) {
+        return res.json({ success: true, result: plainData.result });
+      }
+
+      return res.status(400).json({
+        success: false,
+        error: plainData.description || data.description || 'เกิดข้อผิดพลาดในการส่งข้อความผ่าน Telegram Bot API',
+      });
     } catch (err: any) {
       console.error('Telegram API error:', err);
       return res.status(500).json({

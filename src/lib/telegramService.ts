@@ -16,12 +16,20 @@ export const setStoredTelegramConfig = (config: TelegramConfig) => {
   localStorage.setItem('workhub_telegram_chat_id', config.chatId.trim());
 };
 
+const escapeHtml = (text: string | number | undefined | null): string => {
+  if (text === undefined || text === null) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
+
 export const formatTelegramMessage = (submission: TaskSubmission): string => {
   const { taskType, employeeName, employeeId, submittedAt, date, time } = submission;
 
-  const dateStr = submittedAt || `${date} ${time} น.`;
-  const staffName = employeeName || 'ไม่ระบุ';
-  const empId = employeeId || '-';
+  const dateStr = escapeHtml(submittedAt || `${date} ${time} น.`);
+  const staffName = escapeHtml(employeeName || 'ไม่ระบุ');
+  const empId = escapeHtml(employeeId || '-');
 
   let header = '';
   let details = '';
@@ -30,10 +38,11 @@ export const formatTelegramMessage = (submission: TaskSubmission): string => {
     case 'ufund': {
       const sub = submission as any;
       const amountText = `<b>${Number(sub.currentBalance || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</b>`;
+      const noteText = escapeHtml(sub.transactionNote || sub.notes || '-');
       header = '💳 <b>[รายงานส่งงาน] UFund สลิปประจำวัน</b>';
       details = `
 • <b>ยอดคงเหลือปัจจุบัน:</b> ${amountText}
-• <b>หมายเหตุ/ธุรกรรม:</b> ${sub.transactionNote || sub.notes || '-'}
+• <b>หมายเหตุ/ธุรกรรม:</b> ${noteText}
 `;
       break;
     }
@@ -41,9 +50,9 @@ export const formatTelegramMessage = (submission: TaskSubmission): string => {
       const sub = submission as any;
       header = '📣 <b>[รายงานส่งงาน] Morning Brief ประจำวัน</b>';
       details = `
-• <b>วันประชุม:</b> วัน${sub.workDay || '-'}
-• <b>หัวข้อบรีฟ:</b> ${sub.briefTopic || '-'}
-• <b>รายละเอียด/บันทึก:</b> ${sub.notes || '-'}
+• <b>วันประชุม:</b> วัน${escapeHtml(sub.workDay || '-')}
+• <b>หัวข้อบรีฟ:</b> ${escapeHtml(sub.briefTopic || '-')}
+• <b>รายละเอียด/บันทึก:</b> ${escapeHtml(sub.notes || '-')}
 `;
       break;
     }
@@ -51,8 +60,8 @@ export const formatTelegramMessage = (submission: TaskSubmission): string => {
       const sub = submission as any;
       header = '✨ <b>[รายงานส่งงาน] Live Display & Big Cleaning</b>';
       details = `
-• <b>ประเภทงาน:</b> ${sub.jobType || '-'}
-• <b>บันทึกเพิ่มเติม:</b> ${sub.notes || '-'}
+• <b>ประเภทงาน:</b> ${escapeHtml(sub.jobType || '-')}
+• <b>บันทึกเพิ่มเติม:</b> ${escapeHtml(sub.notes || '-')}
 `;
       break;
     }
@@ -60,15 +69,15 @@ export const formatTelegramMessage = (submission: TaskSubmission): string => {
       const sub = submission as any;
       const itemsCount = sub.items ? sub.items.length : 0;
       const itemsList = sub.items
-        ? sub.items.map((i: any) => `  - ${i.itemName}: <b>${i.actualCount}</b> ${i.unit}`).join('\n')
+        ? sub.items.map((i: any) => `  - ${escapeHtml(i.itemName)}: <b>${escapeHtml(i.actualCount)}</b> ${escapeHtml(i.unit)}`).join('\n')
         : '-';
       header = '📦 <b>[รายงานส่งงาน] Stock Count ตรวจนับสินค้า</b>';
       details = `
 • <b>รายการสินค้าทั้งหมด:</b> ${itemsCount} รายการ
-• <b>รวมจำนวนนับจริง:</b> ${sub.totalUnitsCounted || 0} ชิ้น
+• <b>รวมจำนวนนับจริง:</b> ${escapeHtml(sub.totalUnitsCounted || 0)} ชิ้น
 • <b>รายละเอียดการนับ:</b>
 ${itemsList}
-• <b>หมายเหตุ:</b> ${sub.notes || '-'}
+• <b>หมายเหตุ:</b> ${escapeHtml(sub.notes || '-')}
 `;
       break;
     }
@@ -77,12 +86,12 @@ ${itemsList}
       const priceText = `<b>${Number(sub.price || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })} บาท</b>`;
       header = '📝 <b>[รายงานส่งงาน] แก้ไขบิล (EDIT BILL)</b>';
       details = `
-• <b>ตัวเลือก/ประเภท:</b> ${sub.editCategory || '-'}
-• <b>วันเวลาที่เกิดรายการ:</b> ${sub.dateTime || `${sub.date} ${sub.time}`}
-• <b>สินค้า:</b> ${sub.productName || '-'}
+• <b>ตัวเลือก/ประเภท:</b> ${escapeHtml(sub.editCategory || '-')}
+• <b>วันเวลาที่เกิดรายการ:</b> ${escapeHtml(sub.dateTime || `${sub.date} ${sub.time}`)}
+• <b>สินค้า:</b> ${escapeHtml(sub.productName || '-')}
 • <b>ราคา:</b> ${priceText}
-• <b>Phy ID:</b> <code>${sub.phyId || '-'}</code>
-• <b>เหตุผลที่ขอแก้ไข:</b> ${sub.reason || sub.notes || '-'}
+• <b>Phy ID:</b> <code>${escapeHtml(sub.phyId || '-')}</code>
+• <b>เหตุผลที่ขอแก้ไข:</b> ${escapeHtml(sub.reason || sub.notes || '-')}
 `;
       break;
     }
@@ -90,11 +99,11 @@ ${itemsList}
       const sub = submission as any;
       header = '🚚 <b>[รายงานส่งงาน] DHL ส่งงาน / ตรวจรับสินค้า</b>';
       details = `
-• <b>หัวข้อ/รายการ DHL:</b> ${sub.dhlTopic || 'รับ/ส่งมอบสินค้า DHL'}
-• <b>พนักงานผู้ส่งงาน:</b> ${sub.staffEmployeeName || sub.employeeName} (${sub.staffEmployeeId || sub.employeeId})
-• <b>ผู้เซ็นรับ/ส่งงาน:</b> <b>${sub.signerName || 'ไม่ระบุ'}</b>
-• <b>จำนวนภาพถ่ายที่นับได้:</b> <b>${sub.imageCount || 0} ภาพ</b> (สูงสุด 50 ภาพ)
-• <b>หมายเหตุ:</b> ${sub.notes || '-'}
+• <b>หัวข้อ/รายการ DHL:</b> ${escapeHtml(sub.dhlTopic || 'รับ/ส่งมอบสินค้า DHL')}
+• <b>พนักงานผู้ส่งงาน:</b> ${escapeHtml(sub.staffEmployeeName || sub.employeeName)} (${escapeHtml(sub.staffEmployeeId || sub.employeeId)})
+• <b>ผู้เซ็นรับ/ส่งงาน:</b> <b>${escapeHtml(sub.signerName || 'ไม่ระบุ')}</b>
+• <b>จำนวนภาพถ่ายที่นับได้:</b> <b>${escapeHtml(sub.imageCount || 0)} ภาพ</b> (สูงสุด 50 ภาพ)
+• <b>หมายเหตุ:</b> ${escapeHtml(sub.notes || '-')}
 `;
       break;
     }

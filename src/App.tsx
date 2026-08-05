@@ -217,9 +217,11 @@ export default function App() {
         triggerToast(`📲 ส่งงาน "${taskNameMap[submission.taskType]}" สำเร็จ & แจ้งเตือนไปยัง Telegram แล้ว!`);
       } else {
         console.warn('Telegram Notification error:', res.error);
+        triggerToast(`⚠️ ส่งงานสำเร็จ แต่ Telegram แจ้งเตือนไม่สำเร็จ: ${res.error || 'กรุณากรอก Telegram Bot Token และ Chat ID'}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed sending Telegram alert:', err);
+      triggerToast(`⚠️ ส่งงานสำเร็จ แต่เกิดข้อผิดพลาดในการเชื่อมต่อ Telegram`);
     }
   };
 
