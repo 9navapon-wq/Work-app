@@ -39,6 +39,8 @@ import { SubmissionHistoryModal } from './components/SubmissionHistoryModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { GoogleSheetsConfigModal } from './components/GoogleSheetsConfigModal';
 import { sendToGoogleSheets } from './lib/googleSheetsService';
+import { QrScannerModal } from './components/QrScannerModal';
+import { GoogleScriptModal } from './components/GoogleScriptModal';
 import {
   CheckCircle2,
   History,
@@ -51,6 +53,8 @@ import {
   LogOut,
   Send,
   FileSpreadsheet,
+  QrCode,
+  FileCode,
 } from 'lucide-react';
 
 export default function App() {
@@ -59,10 +63,12 @@ export default function App() {
     return localStorage.getItem('workhub_is_authenticated') === 'true';
   });
 
-  // Telegram Modal state
+  // Modal states
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [isGoogleScriptOpen, setIsGoogleScriptOpen] = useState(false);
 
   // Staff Profile state with localStorage persistence
   const [staff, setStaff] = useState<StaffProfile>(() => {
@@ -259,7 +265,25 @@ export default function App() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsQrScannerOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-teal-50 hover:bg-teal-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-teal-900 dark:text-teal-200 font-extrabold text-xs transition-all border border-teal-200 dark:border-slate-700 shadow-2xs cursor-pointer"
+              title="สแกน QR Code / อ่านข้อมูลรูปภาพ"
+            >
+              <QrCode className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+              <span className="hidden sm:inline">สแกน QR Code</span>
+            </button>
+
+            <button
+              onClick={() => setIsGoogleScriptOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-amber-900 dark:text-amber-200 font-extrabold text-xs transition-all border border-amber-200 dark:border-slate-700 shadow-2xs cursor-pointer"
+              title="ตัวอย่าง Google Apps Script บันทึกลง Google Sheets & Drive"
+            >
+              <FileCode className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span className="hidden sm:inline">Google Script</span>
+            </button>
+
             {(staff.employeeId === '16286' || staff.employeeId === '2609') && (
               <>
                 <button
@@ -417,6 +441,17 @@ export default function App() {
         onClose={() => setIsChangePasswordOpen(false)}
         staff={staff}
         onSuccess={(msg) => triggerToast(msg)}
+      />
+
+      <QrScannerModal
+        isOpen={isQrScannerOpen}
+        onClose={() => setIsQrScannerOpen(false)}
+        onScanResult={(data) => triggerToast(`สแกน QR Code สำเร็จ: ${data.slice(0, 30)}...`)}
+      />
+
+      <GoogleScriptModal
+        isOpen={isGoogleScriptOpen}
+        onClose={() => setIsGoogleScriptOpen(false)}
       />
     </div>
   );

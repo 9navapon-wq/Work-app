@@ -126,9 +126,10 @@ export const formatSubmissionToSheetRow = (submission: TaskSubmission): string[]
       const sub = submission as any;
       taskTypeName = '🚚 DHL ส่งงาน / ตรวจรับสินค้า';
       categoryOrTopic = sub.dhlTopic || 'รับ/ส่งมอบสินค้า DHL';
-      amountOrQty = `${sub.imageCount || 0} ภาพ`;
-      refId = sub.signerName || '-';
-      reasonOrDetail = `ผู้เซ็น: ${sub.signerName || '-'} (ภาพถ่าย ${sub.imageCount || 0} ภาพ)`;
+      const trkList = sub.trackingNumbers && sub.trackingNumbers.length > 0 ? sub.trackingNumbers : (sub.qrCodeData ? [sub.qrCodeData] : []);
+      amountOrQty = trkList.length > 0 ? `📦 ${trkList.length} รายการ (${sub.imageCount || 0} ภาพ)` : `${sub.imageCount || 0} ภาพ`;
+      refId = trkList.length > 0 ? trkList.join(', ') : (sub.signerName || '-');
+      reasonOrDetail = `ผู้เซ็น: ${sub.signerName || '-'} | สแกนพัสดุ/QR: ${trkList.length > 0 ? trkList.join(', ') : 'ไม่มีข้อมูลสแกน'}`;
       break;
     }
     default:

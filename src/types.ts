@@ -89,6 +89,8 @@ export interface DhlSubmission extends BaseSubmission {
   staffEmployeeId: string;
   staffEmployeeName: string;
   dhlTopic?: string;
+  trackingNumbers?: string[];
+  qrCodeData?: string;
 }
 
 export type TaskSubmission = 

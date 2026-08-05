@@ -226,8 +226,18 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                               <span><strong>🚚 หัวข้อ:</strong> {(item as any).dhlTopic || 'รับ/ส่งมอบสินค้า DHL'}</span>
                               <span><strong>✍️ ผู้เซ็น:</strong> <span className="font-bold text-amber-700 dark:text-amber-400">{(item as any).signerName || '-'}</span></span>
-                              <span><strong>📸 จำนวนภาพ:</strong> {(item as any).imageCount || 0} ภาพ (สูงสุด 50 ภาพ)</span>
+                              <span><strong>📸 ภาพถ่าย:</strong> {(item as any).imageCount || 0} ภาพ</span>
                             </div>
+                            {(item as any).trackingNumbers && (item as any).trackingNumbers.length > 0 && (
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-amber-200/60 dark:border-amber-800/60">
+                                <span className="font-bold text-amber-900 dark:text-amber-300">📦 บาร์โค้ด/QR ที่สแกน ({(item as any).trackingNumbers.length} รายการ):</span>
+                                {(item as any).trackingNumbers.map((num: string, idx: number) => (
+                                  <span key={idx} className="bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-amber-300 dark:border-amber-700 font-mono text-[11px] font-bold text-amber-900 dark:text-amber-200">
+                                    {num}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                             {(item as any).notes && (
                               <div>
                                 <span><strong>📝 หมายเหตุ:</strong> {(item as any).notes}</span>
@@ -321,27 +331,27 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
       {/* DHL PDF Document Preview Modal */}
       {selectedDhlPdf && (
         <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-fadeIn print:p-0 print:bg-white print:static">
-          <div className="bg-white text-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-6 print:shadow-none print:rounded-none print:w-full print:max-w-none">
+          <div className="bg-white text-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-6 print:shadow-none print:rounded-none print:w-full print:max-w-none relative">
             {/* Header toolbar (Hidden when printing) */}
-            <div className="bg-amber-500 text-slate-950 p-4 flex items-center justify-between font-bold print:hidden">
+            <div className="bg-amber-500 text-slate-950 p-4 flex flex-wrap items-center justify-between gap-3 font-bold print:hidden">
               <div className="flex items-center gap-2">
-                <Printer className="w-5 h-5" />
-                <span>ใบรายงานส่งงาน DHL (บันทึกเป็นไฟล์ PDF / พิมพ์)</span>
+                <Printer className="w-5 h-5 shrink-0" />
+                <span className="text-sm">ใบรายงานส่งงาน DHL</span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 <button
                   type="button"
-                  onClick={() => window.print()}
-                  className="px-4 py-2 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer"
+                  onClick={() => setTimeout(() => { try { window.print(); } catch (e) {} }, 100)}
+                  className="px-3.5 py-2 bg-slate-950 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-colors"
                 >
-                  <Printer className="w-4 h-4" /> บันทึก PDF / พิมพ์
+                  <Printer className="w-4 h-4" /> <span className="hidden sm:inline">บันทึก PDF / </span>พิมพ์
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedDhlPdf(null)}
-                  className="px-3 py-2 bg-white/20 hover:bg-white/30 text-slate-950 text-xs font-bold rounded-xl flex items-center gap-1"
+                  className="px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-colors"
                 >
-                  <X className="w-4 h-4" /> ปิด
+                  <X className="w-4 h-4" /> ปิดออก
                 </button>
               </div>
             </div>
@@ -385,12 +395,34 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-medium">จำนวนภาพถ่ายที่นับได้:</span>
+                  <span className="text-slate-400 block font-medium">จำนวนพัสดุ / ภาพถ่าย:</span>
                   <span className="font-bold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full inline-block">
-                    {selectedDhlPdf.imageCount || (selectedDhlPdf.images?.length || 0)} / 50 ภาพ
+                    📦 พัสดุ {selectedDhlPdf.trackingNumbers?.length || 0} รายการ | 📸 ภาพ {selectedDhlPdf.imageCount || (selectedDhlPdf.images?.length || 0)} ภาพ
                   </span>
                 </div>
               </div>
+
+              {/* Scanned Tracking Numbers in PDF */}
+              {selectedDhlPdf.trackingNumbers && selectedDhlPdf.trackingNumbers.length > 0 && (
+                <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-300 text-xs space-y-2">
+                  <div className="flex items-center justify-between font-bold text-slate-900 border-b border-amber-200 pb-1.5">
+                    <span className="flex items-center gap-1.5">
+                      📦 รายการพัสดุ / เลขบาร์โค้ดที่สแกนรับ ({selectedDhlPdf.trackingNumbers.length} รายการ)
+                    </span>
+                    <span className="text-[10px] text-amber-800 font-bold bg-amber-200 px-2 py-0.5 rounded">
+                      GOOGLE SHEETS SYNCED
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[11px] font-bold text-slate-800">
+                    {selectedDhlPdf.trackingNumbers.map((num: string, idx: number) => (
+                      <div key={idx} className="bg-white px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-2xs flex items-center gap-1.5">
+                        <span className="text-amber-600">#{idx + 1}</span>
+                        <span className="truncate">{num}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {selectedDhlPdf.notes && (
                 <div className="text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
@@ -460,6 +492,8 @@ export const SubmissionHistoryModal: React.FC<SubmissionHistoryModalProps> = ({
                         <img
                           src={img}
                           alt={`DHL ${idx + 1}`}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                         <span className="absolute bottom-1 left-1 bg-slate-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
