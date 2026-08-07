@@ -284,27 +284,23 @@ export default function App() {
               <span className="hidden sm:inline">Google Script</span>
             </button>
 
-            {(staff.employeeId === '16286' || staff.employeeId === '2609') && (
-              <>
-                <button
-                  onClick={() => setIsGoogleSheetsModalOpen(true)}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-emerald-900 dark:text-emerald-200 font-extrabold text-xs transition-all border border-emerald-200 dark:border-slate-700 shadow-2xs cursor-pointer"
-                  title="ตั้งค่าบันทึก Google ชีต"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span className="hidden sm:inline">ตั้งค่า Google ชีต</span>
-                </button>
+            <button
+              onClick={() => setIsGoogleSheetsModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-emerald-900 dark:text-emerald-200 font-extrabold text-xs transition-all border border-emerald-200 dark:border-slate-700 shadow-2xs cursor-pointer"
+              title="ตั้งค่าบันทึก Google ชีต"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">ตั้งค่า Google ชีต</span>
+            </button>
 
-                <button
-                  onClick={() => setIsTelegramModalOpen(true)}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-900 dark:text-sky-200 font-extrabold text-xs transition-all border border-sky-200 dark:border-slate-700 shadow-2xs cursor-pointer"
-                  title="ตั้งค่า Telegram Bot แจ้งเตือน"
-                >
-                  <Send className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                  <span className="hidden sm:inline">ตั้งค่า Telegram</span>
-                </button>
-              </>
-            )}
+            <button
+              onClick={() => setIsTelegramModalOpen(true)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-900 dark:text-sky-200 font-extrabold text-xs transition-all border border-sky-200 dark:border-slate-700 shadow-2xs cursor-pointer"
+              title="ตั้งค่า Telegram Bot แจ้งเตือน"
+            >
+              <Send className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span className="hidden sm:inline">ตั้งค่า Telegram</span>
+            </button>
 
             <button
               onClick={() => setActiveModal('history')}
